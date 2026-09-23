@@ -1,0 +1,235 @@
+@page
+@model HillApp.Pages.RecordsModel
+@using System.Globalization
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <title>Récords HCR2</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="records-body">
+    <main class="contenedor-principal">
+        <header class="app-header">
+            <div class="brand-block">
+                <span class="eyebrow">Hill Climb Racing 2</span>
+                <h1>Panel de Récords</h1>
+                <p>Administra tus distancias y revisa el progreso de todos tus mapas y vehículos.</p>
+            </div>
+
+            <div class="topbar app-topbar">
+                <div class="session-info">Sesión: <strong>@Model.NombreUsuario</strong></div>
+                <nav class="topbar-actions" aria-label="Navegación de usuario">
+                    <a asp-page="/Perfil" class="btn-nav">👤 Perfil</a>
+                    <a asp-page="/Comentarios" class="btn-nav btn-comentarios">💬 Comentarios</a>
+                    @if (Model.EsAdministrador)
+                    {
+                        <a asp-page="/Gestion" class="btn-nav btn-gestion">⚙ Gestión</a>
+                    }
+                    <form method="post" asp-page-handler="Logout">
+                        <button class="btn-salir" type="submit">Cerrar sesión</button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Mensaje))
+        {
+            <div class="mensaje-alerta mensaje-ok">@Model.Mensaje</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="mensaje-alerta mensaje-error">@Model.ErrorMessage</div>
+        }
+
+        <section class="records-toolbar" aria-label="Editar récord">
+            <form method="post" class="panel-registro">
+                <div class="field-group">
+                    <label asp-for="MapaSeleccionado">Mapa</label>
+                    <select asp-for="MapaSeleccionado">
+                        @foreach (var mapa in RecordsModel.Mapas)
+                        {
+                            <option value="@mapa.Key">@mapa.DisplayName</option>
+                        }
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label asp-for="VehiculoSeleccionado">Vehículo</label>
+                    <select asp-for="VehiculoSeleccionado">
+                        @foreach (var vehiculo in RecordsModel.Vehiculos)
+                        {
+                            <option value="@vehiculo.Key">@vehiculo.DisplayName</option>
+                        }
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label asp-for="Distancia">Récord (distancia)</label>
+                    <input asp-for="Distancia" type="number" min="0" step="1" inputmode="numeric" placeholder="Ej. 10500" />
+                </div>
+                <div class="contenedor-botones">
+                    <button type="submit" asp-page-handler="Guardar" class="btn-guardar">Guardar / Actualizar</button>
+                    <button type="submit" asp-page-handler="Eliminar" class="btn-eliminar" onclick="return confirm('¿Seguro que deseas eliminar este récord?');">Eliminar</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="dashboard-summary" aria-label="Resumen de progreso">
+            <div class="summary-card">
+                <span class="summary-label">Metas 10K</span>
+                <strong>@Model.Completadas10k / @Model.TotalCeldas10k</strong>
+                @{
+                    var tenK = Model.TotalCeldas10k == 0 ? 0 : Model.Completadas10k * 100.0 / Model.TotalCeldas10k;
+                    var tenKWidth = tenK.ToString("F1", CultureInfo.InvariantCulture);
+                }
+                <div class="summary-progress"><span style="width:@(tenKWidth)%"></span></div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Metas 5K</span>
+                <strong>@Model.Completadas5k / @Model.TotalCeldas5k</strong>
+                @{
+                    var fiveK = Model.TotalCeldas5k == 0 ? 0 : Model.Completadas5k * 100.0 / Model.TotalCeldas5k;
+                    var fiveKWidth = fiveK.ToString("F1", CultureInfo.InvariantCulture);
+                }
+                <div class="summary-progress"><span style="width:@(fiveKWidth)%"></span></div>
+            </div>
+            <div class="summary-card summary-global">
+                <span class="summary-label">Progreso global</span>
+                <strong>@Model.GlobalPercentage.ToString("F1", CultureInfo.CurrentCulture)%</strong>
+                @{ var globalSummaryWidth = Model.GlobalPercentage.ToString("F1", CultureInfo.InvariantCulture); }
+                <div class="summary-progress"><span style="width:@(globalSummaryWidth)%"></span></div>
+            </div>
+        </section>
+
+        <div class="table-help">
+            <div class="legend" aria-label="Leyenda">
+                <span><i class="legend-dot legend-empty"></i> Sin récord</span>
+                <span><i class="legend-dot legend-progress"></i> En progreso</span>
+                <span><i class="legend-dot legend-complete"></i> Meta completada</span>
+            </div>
+            <span class="mobile-hint">En móvil, desliza la tabla horizontalmente →</span>
+        </div>
+
+        <div class="contenedor-tabla" tabindex="0" aria-label="Tabla de récords; se puede desplazar horizontalmente">
+            <table class="tabla-records">
+                <thead>
+                    <tr>
+                        <th class="columna-fija-mapa">MAPAS</th>
+                        @foreach (var vehiculo in RecordsModel.Vehiculos)
+                        {
+                            <th>
+                                <img src="~/imagenes/carros/@vehiculo.ImageFile" class="img-vehiculo" title="@vehiculo.DisplayName" alt="@vehiculo.DisplayName" loading="lazy" />
+                                <div class="nombre-lindo-compacto">@vehiculo.DisplayName</div>
+                            </th>
+                        }
+                        <th class="celda-total">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var mapa in RecordsModel.Mapas)
+                    {
+                        var mapTotal = Model.GetMapTotal(mapa.Key);
+                        var mapPercentage = Model.GetMapPercentage(mapa.Key);
+                        var mapWidth = mapPercentage.ToString("F1", CultureInfo.InvariantCulture);
+                        <tr>
+                            <td class="columna-fija-mapa">
+                                <img src="~/imagenes/mapas/@mapa.ImageFile" class="img-mapa" alt="@mapa.DisplayName" loading="lazy" />
+                                <div class="nombre-mapa-texto">@mapa.DisplayName</div>
+                            </td>
+
+                            @foreach (var vehiculo in RecordsModel.Vehiculos)
+                            {
+                                var distance = Model.GetDistance(mapa.Key, vehiculo.Key);
+                                var points = Model.GetPoints(mapa.Key, vehiculo.Key);
+                                var css = distance == 0 ? "celda-gris" : (Model.IsCompleted(mapa.Key, vehiculo.Key) ? "celda-verde" : "celda-naranja");
+                                <td class="@css record-cell" data-map="@mapa.Key" data-vehicle="@vehiculo.Key" data-distance="@distance" tabindex="0" title="@mapa.DisplayName - @vehiculo.DisplayName: @points.ToString("N0", CultureInfo.CurrentCulture) pts · Toca para editar">
+                                    @distance.ToString("N0", CultureInfo.CurrentCulture)
+                                </td>
+                            }
+
+                            <td class="celda-total">
+                                <div class="contenedor-progreso-celda">
+                                    <div class="texto-puntos">@mapTotal.ToString("N0", CultureInfo.CurrentCulture)</div>
+                                    <div class="texto-porcentaje">@mapPercentage.ToString("F1", CultureInfo.CurrentCulture)%</div>
+                                    <div class="barra-bg"><div class="barra-llenado" style="width:@(mapWidth)%"></div></div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <td class="columna-fija-mapa total-label">TOTAL</td>
+                        @foreach (var vehiculo in RecordsModel.Vehiculos)
+                        {
+                            var total = Model.GetVehicleTotal(vehiculo.Key);
+                            var percentage = Model.GetVehiclePercentage(vehiculo.Key);
+                            var vehicleWidth = percentage.ToString("F1", CultureInfo.InvariantCulture);
+                            <td class="celda-total">
+                                <div class="contenedor-progreso-celda">
+                                    <div class="texto-puntos">@total.ToString("N0", CultureInfo.CurrentCulture)</div>
+                                    <div class="texto-porcentaje">@percentage.ToString("F1", CultureInfo.CurrentCulture)%</div>
+                                    <div class="barra-bg"><div class="barra-llenado" style="width:@(vehicleWidth)%"></div></div>
+                                </div>
+                            </td>
+                        }
+                        @{ var globalWidth = Model.GlobalPercentage.ToString("F1", CultureInfo.InvariantCulture); }
+                        <td class="celda-amarilla">
+                            <div class="contenedor-progreso-celda gran-total">
+                                <div class="texto-puntos">@Model.GrandTotal.ToString("N0", CultureInfo.CurrentCulture)</div>
+                                <div class="texto-global">@Model.GlobalPercentage.ToString("F1", CultureInfo.CurrentCulture)%</div>
+                                <div class="barra-bg barra-bg-total"><div class="barra-llenado-total" style="width:@(globalWidth)%"></div></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        (() => {
+            const mapSelect = document.getElementById('MapaSeleccionado');
+            const vehicleSelect = document.getElementById('VehiculoSeleccionado');
+            const distanceInput = document.getElementById('Distancia');
+
+            function selectCell(cell) {
+                if (!mapSelect || !vehicleSelect || !distanceInput) return;
+                mapSelect.value = cell.dataset.map || '';
+                vehicleSelect.value = cell.dataset.vehicle || '';
+                distanceInput.value = cell.dataset.distance || '0';
+                distanceInput.focus({ preventScroll: true });
+                document.querySelectorAll('.record-cell.is-selected').forEach(x => x.classList.remove('is-selected'));
+                cell.classList.add('is-selected');
+            }
+
+            document.querySelectorAll('.record-cell').forEach(cell => {
+                cell.addEventListener('click', () => selectCell(cell));
+                cell.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        selectCell(cell);
+                    }
+                });
+            });
+
+            async function keepSessionAlive() {
+                if (document.visibilityState !== 'visible') return;
+                try {
+                    const response = await fetch('/session/ping', {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        cache: 'no-store'
+                    });
+                    if (response.status === 401) window.location.href = '/Login';
+                } catch { /* Un fallo temporal de red no expulsa al usuario. */ }
+            }
+
+            window.setInterval(keepSessionAlive, 5 * 60 * 1000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') keepSessionAlive();
+            });
+        })();
+    </script>
+</body>
+</html>

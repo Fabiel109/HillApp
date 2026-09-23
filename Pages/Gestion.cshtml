@@ -1,0 +1,139 @@
+@page
+@model HillApp.Pages.GestionModel
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión - Récords HCR2</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="records-body management-body">
+    <main class="contenedor-principal management-wrapper">
+        <header class="app-header">
+            <div class="brand-block">
+                <span class="eyebrow">Control de cuentas</span>
+                <h1>Gestión</h1>
+                <p>Revisa las cuentas registradas y su actividad reciente.</p>
+            </div>
+            <div class="topbar app-topbar">
+                <div class="session-info">Sesión: <strong>@Model.NombreUsuario</strong></div>
+                <nav class="topbar-actions" aria-label="Navegación de usuario">
+                    <a asp-page="/Records" class="btn-nav">← Récords</a>
+                    <a asp-page="/Perfil" class="btn-nav">👤 Perfil</a>
+                    <a asp-page="/Comentarios" class="btn-nav btn-comentarios">💬 Comentarios</a>
+                    <form method="post" asp-page-handler="Logout">
+                        <button class="btn-salir" type="submit">Cerrar sesión</button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Mensaje))
+        {
+            <div class="mensaje-alerta mensaje-ok">@Model.Mensaje</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="mensaje-alerta mensaje-error">@Model.ErrorMessage</div>
+        }
+
+        <section class="management-summary">
+            <div class="summary-card">
+                <span class="summary-label">Cuentas registradas</span>
+                <strong>@Model.TotalUsuarios</strong>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Actividad últimos 30 días</span>
+                <strong>@Model.Activos30Dias</strong>
+            </div>
+            <div class="summary-card summary-global">
+                <span class="summary-label">Límite de inactividad</span>
+                <strong>500 días</strong>
+            </div>
+        </section>
+
+        <section class="management-toolbar">
+            <form method="get" class="sort-form">
+                <label for="Orden">Ordenar por</label>
+                <select id="Orden" name="Orden" class="txt-input" onchange="this.form.submit()">
+                    @if (Model.Orden == "acceso")
+                    {
+                        <option value="creacion">Fecha de creación</option>
+                        <option value="acceso" selected>Último acceso</option>
+                    }
+                    else
+                    {
+                        <option value="creacion" selected>Fecha de creación</option>
+                        <option value="acceso">Último acceso</option>
+                    }
+                </select>
+            </form>
+        </section>
+
+        <section class="management-table-card">
+            <div class="management-table-wrap">
+                <table class="management-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Correo</th>
+                            <th>Creación</th>
+                            <th>Último acceso</th>
+                            <th>Inactividad</th>
+                            <th>Datos</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var user in Model.Usuarios)
+                    {
+                        var dias = Model.GetInactiveDays(user);
+                        <tr>
+                            <td data-label="Usuario"><strong>@user.Username</strong></td>
+                            <td data-label="Correo" class="email-cell">@user.Email</td>
+                            <td data-label="Creación">@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td data-label="Último acceso">@(user.LastAccess?.ToString("dd/MM/yyyy HH:mm") ?? "Sin registro")</td>
+                            <td data-label="Inactividad">
+                                <span class="inactivity-badge @(dias >= 450 ? "inactivity-danger" : dias >= 365 ? "inactivity-warning" : "")">@dias días</span>
+                            </td>
+                            <td data-label="Datos" class="data-counts">@user.RecordCount récords · @user.CommentCount comentarios</td>
+                            <td data-label="Acción" class="management-action">
+                                @if (Model.CurrentUser?.UserId == user.UserId)
+                                {
+                                    <span class="self-account-tag">Tu cuenta</span>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="Eliminar" onsubmit="return confirm('¿Eliminar esta cuenta y TODOS sus datos? Esta acción no se puede deshacer.');">
+                                        <input type="hidden" name="usuarioId" value="@user.UserId" />
+                                        <input type="hidden" name="Orden" value="@Model.Orden" />
+                                        <button type="submit" class="btn-delete-user">Eliminar</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.Usuarios.Count == 0)
+            {
+                <div class="empty-management">No hay cuentas para mostrar.</div>
+            }
+        </section>
+    </main>
+    <script>
+        (() => {
+            async function keepSessionAlive() {
+                if (document.visibilityState !== 'visible') return;
+                try {
+                    const response = await fetch('/session/ping', { credentials: 'same-origin', cache: 'no-store' });
+                    if (response.status === 401) window.location.href = '/Login';
+                } catch { }
+            }
+            window.setInterval(keepSessionAlive, 5 * 60 * 1000);
+        })();
+    </script>
+</body>
+</html>

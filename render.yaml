@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: hillapp-hcr2
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__TiDB
+        sync: false
+      - key: Email__Username
+        sync: false
+      - key: Email__Password
+        sync: false
+      - key: Email__FromEmail
+        value: cfabiel31@gmail.com
+      - key: Email__ToEmail
+        value: cfabiel31@gmail.com
+      - key: Email__Host
+        value: smtp.gmail.com
+      - key: Email__Port
+        value: "587"

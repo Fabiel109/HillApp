@@ -1,0 +1,26 @@
+HILLAPP V3 - PASOS DESPUES DE EXTRAER
+=====================================
+
+1) En TiDB Cloud > SQL Editor ejecuta TODO:
+   SQL/ACTUALIZAR_BASE_V3.sql
+
+2) Copia el archivo appsettings.Local.json de tu carpeta v2 a esta carpeta v3.
+   Debe quedar al lado de HillApp.csproj.
+   NO lo subas a GitHub.
+
+3) Abre una terminal en esta carpeta y ejecuta:
+   dotnet restore
+   dotnet run
+
+4) Entra con una cuenta normal:
+   - debe aparecer Perfil
+   - NO debe aparecer Gestión
+
+5) Entra con la cuenta cuyo correo registrado es:
+   cfabiel31@gmail.com
+   - debe aparecer Gestión
+
+6) Prueba cambio de usuario, cambio de contraseña y una cuenta de prueba antes de borrar cuentas reales.
+
+IMPORTANTE:
+Las cuentas con 500 días sin actividad se eliminan automáticamente junto con sus récords y comentarios.

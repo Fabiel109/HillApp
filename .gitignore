@@ -1,0 +1,14 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Credenciales locales: NO subir a GitHub
+appsettings.Local.json
+.env
+.env.*
+
+# Archivos de sistema/editor
+.DS_Store
+Thumbs.db

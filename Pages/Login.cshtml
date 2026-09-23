@@ -1,0 +1,46 @@
+@page
+@model HillApp.Pages.LoginModel
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Sesión - Récords HCR2</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="auth-body login-body">
+    <main class="auth-card login-card">
+        <h2>Iniciar Sesión</h2>
+
+        @if (Model.RegistroOk)
+        {
+            <div class="alerta-exito">¡Cuenta creada con éxito! Ya puedes iniciar sesión.</div>
+        }
+        @if (Model.CuentaEliminada)
+        {
+            <div class="alerta-exito">Tu cuenta y sus datos fueron eliminados correctamente.</div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alerta-error">@Model.ErrorMessage</div>
+        }
+
+        <form method="post">
+            <div class="campo">
+                <strong>Usuario o correo</strong>
+                <input asp-for="Usuario" class="txt-input" placeholder="Tu usuario o correo" autocomplete="username" />
+            </div>
+
+            <div class="campo">
+                <strong>Contraseña</strong>
+                <input asp-for="Contrasena" class="txt-input" type="password" placeholder="••••••••" autocomplete="current-password" />
+            </div>
+
+            <button type="submit" class="btn-enviar">Entrar</button>
+        </form>
+
+        <a asp-page="/Registro" class="auth-link">¿No tienes cuenta? Regístrate aquí</a>
+    </main>
+</body>
+</html>

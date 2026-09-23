@@ -1,0 +1,127 @@
+@page
+@model HillApp.Pages.PerfilModel
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perfil - Récords HCR2</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="records-body profile-body">
+    <main class="contenedor-principal profile-wrapper">
+        <header class="app-header profile-header">
+            <div class="brand-block">
+                <span class="eyebrow">Tu cuenta</span>
+                <h1>Perfil</h1>
+                <p>Consulta tus datos, cambia tu nombre o contraseña y administra tu cuenta.</p>
+            </div>
+            <div class="topbar app-topbar">
+                <div class="session-info">Sesión: <strong>@Model.NombreUsuario</strong></div>
+                <nav class="topbar-actions" aria-label="Navegación de usuario">
+                    <a asp-page="/Records" class="btn-nav">← Récords</a>
+                    <a asp-page="/Comentarios" class="btn-nav btn-comentarios">💬 Comentarios</a>
+                    @if (Model.EsAdministrador)
+                    {
+                        <a asp-page="/Gestion" class="btn-nav btn-gestion">⚙ Gestión</a>
+                    }
+                    <form method="post" asp-page-handler="Logout">
+                        <button class="btn-salir" type="submit">Cerrar sesión</button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Mensaje))
+        {
+            <div class="mensaje-alerta mensaje-ok">@Model.Mensaje</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="mensaje-alerta mensaje-error">@Model.ErrorMessage</div>
+        }
+
+        <section class="profile-overview">
+            <div class="profile-avatar">@((Model.NombreUsuario.FirstOrDefault()).ToString().ToUpperInvariant())</div>
+            <div>
+                <h2>@Model.NombreUsuario</h2>
+                <p>@Model.Correo</p>
+                <div class="profile-dates">
+                    <span>Cuenta creada: <strong>@(Model.FechaRegistro?.ToString("dd/MM/yyyy HH:mm") ?? "—")</strong></span>
+                    <span>Último acceso: <strong>@(Model.UltimoAcceso?.ToString("dd/MM/yyyy HH:mm") ?? "—")</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <div class="profile-grid">
+            <section class="settings-card">
+                <div class="settings-heading">
+                    <h2>Nombre de usuario</h2>
+                    <p>Cambia el nombre que aparece en tu sesión. Tu correo no cambia.</p>
+                </div>
+                <form method="post" asp-page-handler="Nombre">
+                    <div class="campo">
+                        <strong>Nuevo nombre</strong>
+                        <input asp-for="NuevoNombre" class="txt-input" maxlength="100" minlength="3" autocomplete="username" />
+                    </div>
+                    <button type="submit" class="btn-enviar settings-submit">Guardar nombre</button>
+                </form>
+            </section>
+
+            <section class="settings-card">
+                <div class="settings-heading">
+                    <h2>Cambiar contraseña</h2>
+                    <p>Para confirmar el cambio debes escribir tu contraseña actual.</p>
+                </div>
+                <form method="post" asp-page-handler="Password">
+                    <div class="campo">
+                        <strong>Contraseña actual</strong>
+                        <input asp-for="ContrasenaActual" class="txt-input" type="password" autocomplete="current-password" />
+                    </div>
+                    <div class="campo">
+                        <strong>Nueva contraseña</strong>
+                        <input asp-for="NuevaContrasena" class="txt-input" type="password" minlength="8" autocomplete="new-password" />
+                    </div>
+                    <div class="campo">
+                        <strong>Repite la nueva contraseña</strong>
+                        <input asp-for="ConfirmarContrasena" class="txt-input" type="password" minlength="8" autocomplete="new-password" />
+                    </div>
+                    <button type="submit" class="btn-enviar settings-submit">Cambiar contraseña</button>
+                </form>
+            </section>
+        </div>
+
+        <section class="danger-card">
+            <div class="settings-heading">
+                <span class="danger-label">Zona de eliminación</span>
+                <h2>Eliminar mi cuenta</h2>
+                <p>Esto elimina permanentemente tu cuenta, tus récords y tus comentarios. Esta acción no se puede deshacer.</p>
+            </div>
+            <form method="post" asp-page-handler="EliminarCuenta" class="delete-account-form" onsubmit="return confirm('¿Seguro que deseas eliminar tu cuenta y TODOS tus datos? Esta acción no se puede deshacer.');">
+                <div class="campo delete-password-field">
+                    <strong>Confirma con tu contraseña actual</strong>
+                    <input asp-for="ContrasenaEliminar" class="txt-input" type="password" autocomplete="current-password" required />
+                </div>
+                <button type="submit" class="btn-danger-account">Eliminar cuenta definitivamente</button>
+            </form>
+        </section>
+
+        <p class="retention-footnote">Las cuentas que permanezcan 500 días sin actividad se eliminan automáticamente junto con sus datos.</p>
+    </main>
+    <script>
+        (() => {
+            async function keepSessionAlive() {
+                if (document.visibilityState !== 'visible') return;
+                try {
+                    const response = await fetch('/session/ping', { credentials: 'same-origin', cache: 'no-store' });
+                    if (response.status === 401) window.location.href = '/Login';
+                } catch { }
+            }
+            window.setInterval(keepSessionAlive, 5 * 60 * 1000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') keepSessionAlive();
+            });
+        })();
+    </script>
+</body>
+</html>

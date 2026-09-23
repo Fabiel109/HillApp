@@ -1,0 +1,46 @@
+@page
+@model HillApp.Pages.RegistroModel
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro - Récords HCR2</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="auth-body registro-body">
+    <main class="auth-card registro-card">
+        <h2>Crear Cuenta</h2>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alerta-error">@Model.ErrorMessage</div>
+        }
+
+        <div class="account-retention-notice">
+            Si una cuenta permanece <strong>500 días sin actividad</strong>, la cuenta y sus datos se eliminarán automáticamente. Para volver a usar la app después de ese plazo tendrás que crear una cuenta nueva.
+        </div>
+
+        <form method="post">
+            <div class="campo">
+                <strong>Nombre de Usuario:</strong>
+                <input asp-for="Usuario" class="txt-input" placeholder="Ej. Pedro123" autocomplete="username" />
+            </div>
+
+            <div class="campo">
+                <strong>Correo Electrónico:</strong>
+                <input asp-for="Correo" class="txt-input" type="email" placeholder="correo@ejemplo.com" autocomplete="email" />
+            </div>
+
+            <div class="campo">
+                <strong>Contraseña (mínimo 8 caracteres):</strong>
+                <input asp-for="Contrasena" class="txt-input" type="password" placeholder="••••••••" minlength="8" autocomplete="new-password" />
+            </div>
+
+            <button type="submit" class="btn-enviar">Registrarse</button>
+        </form>
+
+        <a asp-page="/Login" class="auth-link">¿Ya tienes cuenta? Inicia sesión aquí</a>
+    </main>
+</body>
+</html>

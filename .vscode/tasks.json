@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "HillApp: restaurar paquetes",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["restore", "${workspaceFolder}/HillApp.csproj"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "HillApp: ejecutar",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["run", "--project", "${workspaceFolder}/HillApp.csproj"],
+      "problemMatcher": "$msCompile",
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

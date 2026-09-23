@@ -1,0 +1,95 @@
+@page
+@model HillApp.Pages.ComentariosModel
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comentarios - Récords HCR2</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="records-body feedback-body">
+    <main class="contenedor-principal feedback-wrapper">
+        <div class="topbar app-topbar">
+            <div class="session-info">Sesión: <strong>@Model.NombreUsuario</strong></div>
+            <nav class="topbar-actions" aria-label="Navegación de usuario">
+                <a asp-page="/Records" class="btn-nav">← Récords</a>
+                <a asp-page="/Perfil" class="btn-nav">👤 Perfil</a>
+                @if (Model.EsAdministrador)
+                {
+                    <a asp-page="/Gestion" class="btn-nav btn-gestion">⚙ Gestión</a>
+                }
+                <form method="post" asp-page-handler="Logout">
+                    <button class="btn-salir" type="submit">Cerrar sesión</button>
+                </form>
+            </nav>
+        </div>
+
+        <section class="feedback-card">
+            <div class="feedback-heading">
+                <span class="eyebrow">Tu opinión importa</span>
+                <h1>Comentarios y sugerencias</h1>
+                <p>Cuéntame una idea, un error que encontraste o algo que te gustaría mejorar en la aplicación.</p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Mensaje))
+            {
+                <div class="feedback-message @(Model.MensajeEsAdvertencia ? "feedback-warning" : "feedback-success")">
+                    @Model.Mensaje
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="alerta-error">@Model.ErrorMessage</div>
+            }
+
+            <div class="feedback-email">
+                <span>Se enviará usando el correo de tu cuenta:</span>
+                <strong>@Model.CorreoUsuario</strong>
+            </div>
+
+            <form method="post" class="feedback-form">
+                <div class="campo">
+                    <strong>Tipo</strong>
+                    <select asp-for="Tipo" class="txt-input">
+                        <option value="Opinión">Opinión</option>
+                        <option value="Sugerencia">Sugerencia</option>
+                        <option value="Bug">Reportar un bug</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <strong>Comentario</strong>
+                    <textarea asp-for="Comentario" class="txt-input feedback-textarea" maxlength="2000" minlength="10" placeholder="Escribe aquí tu opinión, sugerencia o el problema que encontraste..." required></textarea>
+                    <div class="char-hint">Máximo 2000 caracteres.</div>
+                </div>
+
+                <button type="submit" class="btn-enviar btn-feedback">Enviar comentario</button>
+            </form>
+
+            <p class="feedback-note">Por seguridad, el formulario solo funciona con una sesión iniciada y permite un envío por minuto.</p>
+        </section>
+    </main>
+    <script>
+        (() => {
+            async function keepSessionAlive() {
+                if (document.visibilityState !== 'visible') return;
+                try {
+                    const response = await fetch('/session/ping', {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        cache: 'no-store'
+                    });
+                    if (response.status === 401) window.location.href = '/Login';
+                } catch { }
+            }
+            window.setInterval(keepSessionAlive, 5 * 60 * 1000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') keepSessionAlive();
+            });
+        })();
+    </script>
+</body>
+</html>

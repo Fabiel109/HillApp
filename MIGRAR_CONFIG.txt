@@ -1,0 +1,13 @@
+Tu configuración de TiDB y Gmail NO se copió dentro de este ZIP para evitar exponer contraseñas.
+
+Copia desde tu proyecto v2:
+
+appsettings.Local.json
+
+hacia esta carpeta v3, exactamente al lado de:
+
+HillApp.csproj
+Program.cs
+appsettings.json
+
+No copies las credenciales a appsettings.json y no subas appsettings.Local.json a GitHub.
