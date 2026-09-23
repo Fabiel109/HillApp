@@ -1,3 +1,7 @@
+# Nota para hosting gratis
+
+Para Render Free, esta versión puede usar **Resend por HTTPS** para los comentarios, manteniendo **Gmail SMTP en local**. Consulta `RENDER_GRATIS.md`.
+
 # HillApp v3 — VS Code + ASP.NET Core + TiDB Cloud
 
 Esta versión conserva el panel de récords, la sesión única y los comentarios por correo, y agrega administración de cuentas y perfil.

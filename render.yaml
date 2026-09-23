@@ -9,15 +9,15 @@ services:
         value: Production
       - key: ConnectionStrings__TiDB
         sync: false
-      - key: Email__Username
-        sync: false
-      - key: Email__Password
+      - key: Email__Provider
+        value: Resend
+      - key: Email__ApiKey
         sync: false
       - key: Email__FromEmail
-        value: cfabiel31@gmail.com
+        value: HillApp HCR2 <onboarding@resend.dev>
       - key: Email__ToEmail
         value: cfabiel31@gmail.com
-      - key: Email__Host
-        value: smtp.gmail.com
-      - key: Email__Port
-        value: "587"
+      - key: Admin__OwnerEmail
+        value: cfabiel31@gmail.com
+      - key: Accounts__InactiveDays
+        value: "500"

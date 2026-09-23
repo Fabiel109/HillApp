@@ -15,6 +15,7 @@ if (!string.IsNullOrWhiteSpace(port))
 
 builder.Services.AddRazorPages();
 builder.Services.AddResponseCompression();
+builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Database>();
 builder.Services.AddScoped<UserSessionService>();
 builder.Services.AddSingleton<EmailService>();
